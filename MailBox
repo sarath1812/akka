@@ -1,0 +1,67 @@
+1. What are bounded and unbounded mailboxes? 
+
+In **Akka**, a **mailbox** is a queue that holds messages for an actor. Understanding **bounded** vs **unbounded** mailboxes is important for managing backpressure, memory, and system stability.
+
+
+## 📨 Bounded vs Unbounded Mailbox in Akka
+
+| Feature              | **Bounded Mailbox**                                  | **Unbounded Mailbox**                       |
+| -------------------- | ---------------------------------------------------- | ------------------------------------------- |
+| **Queue Size**       | Has a fixed capacity (max number of msgs)            | No limit — grows as needed                  |
+| **Backpressure**     | ✅ Yes — prevents overload                            | ❌ No — can lead to OutOfMemoryError         |
+| **When to Use**      | High load systems, to protect resources              | Low load or guaranteed small message volume |
+| **Failure Behavior** | Throws `MessageQueueAppendFailedException` when full | Keeps accepting messages indefinitely       |
+| **Configuration**    | Specify `mailbox-type` and `mailbox-capacity`        | Specify only `mailbox-type`                 |
+| **Thread Safety**    | Both are thread-safe                                 | Both are thread-safe                        |
+
+
+## ✅ Use Cases
+
+### 🔹 **Bounded Mailbox**
+
+* Real-time systems where you must prevent memory overload.
+* Systems where **backpressure** is needed.
+* Example: streaming systems, queues connected to limited resources.
+
+### 🔹 **Unbounded Mailbox**
+
+* Systems with low and predictable load.
+* Simpler actor systems for prototyping, where performance is not critical.
+
+Note: On the fly, it can accommodate 1000 messages in the mailbox.
+
+## 🔧 Configuration Example
+
+### **application.conf**
+
+#### 🟢 Bounded Mailbox
+
+```hocon
+bounded-mailbox {
+  mailbox-type = "akka.dispatch.BoundedMailbox"
+  mailbox-capacity = 1000
+  mailbox-push-timeout-time = 0s
+}
+```
+
+#### 🟢 Unbounded Mailbox (default)
+
+```hocon
+unbounded-mailbox {
+  mailbox-type = "akka.dispatch.UnboundedMailbox"
+}
+```
+
+### **Assigning Mailbox to Actor**
+
+val props = Props[MyActor].withMailbox("bounded-mailbox")
+actorSystem.actorOf(props, "myActor")
+
+
+## ⚠️ Important Notes
+
+* A **bounded mailbox** can drop or block messages if full, depending on the timeout config.
+* Always use a **bounded mailbox** in production if you care about stability.
+* Combine it with **Supervision Strategy** to handle overflow scenarios gracefully.
+
+-
