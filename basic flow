@@ -1,0 +1,32 @@
+1. What is actor system
+2. What problems it solved
+3. Akka version which i am using 
+4. What am i using for the http service
+5. What am i using for the marshelling and un-marshelling 
+6. How actors communicate with each other and what are the different communication methods 
+7. Actor life cycle 
+8. Akka architecture
+9. Sending message to itself.
+10. Forwarding the messages . 
+11. How to handle the actor failure 
+12. What are the different stratergies followed to handle the actor failure
+13. Actors hierarchy 
+14. Actors message box.
+15. Dispatchers & different kinds of dispatches.
+16. Routers and routees 
+17. Different routing mechnisms and their use cases.
+18. What are the different reasons for the failure of the actors.
+19. What happens when the actors gets fail
+20. What are dead letters.
+21. different hooks in the actors
+22. Supervision mechanisms 
+23. Building the repeated jobs with the help of akka.
+24. Schedulers and different kinds of schedulers in akka.
+25. What libraries you follow to write the rest apis in akka. 
+26. Actor , ActorSystem , ActorReference.
+27. Killing an actor what is the need of killing an actor and different ways of killing an actor .
+28. Maintaing the state of an actor -> in general state of the actor gets lost when the actor gets restart
+    we need to hanldle it seperately. So, what are the methods which we follow or need to maintain the state of an actor.
+29. How to fine tune the slow performing actor?
+30. Need to build a sample application which runs on the local host and accpepts the http requests.
+
