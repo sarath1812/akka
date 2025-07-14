@@ -3,8 +3,53 @@
 3. Akka version which i am using 
 4. What am i using for the http service
 5. What am i using for the marshelling and un-marshelling 
+   || spray json , circle , play json ||
+    clinet sends data in the form of json -> converted into the respective case class which uses ??? and then it is sotred in the data base/ respective storage 
+    when we return the data to the client using an api response, we generally convert this into json format This process is called as ???
+
 6. How actors communicate with each other and what are the different communication methods 
+ Actors will communicate with other using the messages.
+Tell (!) Non blocking , dont wait for the response, fire and forgot.
+What happens in detail after this 
+Ask (?) blocking , waits for the responese, future[data], 
 7. Actor life cycle 
+
+                    +-------------------+
+                    |                   |
+          +--------->    preStart()     |
+          |         |                   |
+          |         +--------+----------+
+          |                  |
+          |                  v
+     system.actorOf()    +--------+
+                         |        |
+                         | receive|
+                         |        |
+                         +---+----+
+                             |
+   Exception Thrown          |
+         +                   v
+         |             +-----------+
+         |             | preRestart|
+         |             +-----------+
+         |                   |
+         |             (old actor stopped)
+         |                   |
+         |             +-----------+
+         |             |postRestart|
+         |             +-----------+
+         |                   |
+         +------------------>  receive (again)
+                             |
+                        context.stop()
+                             v
+                       +-----------+
+                       | postStop  |
+                       +-----------+
+
+
+Actor Created → Started → (Restarted) → Stopped
+
 8. Akka architecture
 9. Sending a message to itself.
 10. Forwarding the messages. 
@@ -13,13 +58,68 @@
 13. Actor hierarchy 
 14. Actor's message box.
 15. Dispatchers & different kinds of dispatches.
-16. Routers and routees 
+16. Routers and routes 
 17. Different routing mechanisms and their use cases.
 18. What are the different reasons for the failure of the actors?
 19. What happens when the actors fail
+    when an actor fails all the messages sent to the actor are send to the deadletters
+    Then we need use the supervision mechanisms to
+        Restart 
+        Stop 
+        Escalate 
+        Resume 
+actor will be done one of the above depending up on how we have handeled it.
+
+
 20. What are dead letters?
+
+All the messages send to the actor in case of termintaed, non existing , stopped.
+How this got handeled are these messages get stored any where .. can it be reprocessed if they are important.
+Think of deadLetters as a mailbox where Akka puts "undeliverable" messages.
+
 21. different hooks in the actors
 22. Supervision mechanisms 
+
+every actor has the parent actor .. and that actor acts as the supervisior for the child actor 
+
+One-for-One super vision stratergy : only the failed actor will be restarted or follow the respective mechanism 
+All-for-One : if one of the child actor gets failed then all the child actors under the parent actor will gets applied with the mechanism.
+
+import akka.actor._
+
+class Worker extends Actor {
+  def receive = {
+    case "fail" => throw new RuntimeException("Boom!")
+    case msg => println(s"Worker received: $msg")
+  }
+
+  override def preStart(): Unit = println("Worker started")
+  override def postStop(): Unit = println("Worker stopped")
+  override def preRestart(reason: Throwable, msg: Option[Any]): Unit =
+    println(s"Worker restarting due to: ${reason.getMessage}")
+  override def postRestart(reason: Throwable): Unit =
+    println("Worker restarted")
+}
+
+class Supervisor extends Actor {
+  val worker = context.actorOf(Props[Worker], "worker")
+
+  override val supervisorStrategy = OneForOneStrategy() {
+    case _: RuntimeException => Restart
+  }
+
+  def receive = {
+    case msg => worker forward msg
+  }
+}
+
+val system = ActorSystem("SupervisionExample")
+val supervisor = system.actorOf(Props[Supervisor], "supervisor")
+
+supervisor ! "Hello"
+supervisor ! "fail"
+supervisor ! "Hello again"
+
 23. Building the repeated jobs with the help of akka.
 24. Schedulers and different kinds of schedulers in akka.
 25. What libraries you follow to write the rest apis in akka. 
@@ -31,4 +131,6 @@
 30. Need to build a sample application which runs on the local host and accpepts the http requests.
 31. become in akka .. how does it helps in changing the actors behaviour 
 32. Stateful vs stateless actors .. are there any different kinds of actors are there?
+33. Stopping the actor system .. do all the state of the application lost .. is there any way to persist the state of the actor system 
+    can we use the 
 
