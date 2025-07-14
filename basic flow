@@ -54,10 +54,32 @@ Actor Created → Started → (Restarted) → Stopped
 9. Sending a message to itself.
 10. Forwarding the messages. 
 11. How to handle the actor failure 
+   Actors failure can be handeled with the help of the supervison stratergy.4
+
+The parent actor is always the supervisor of its children.
+Whenever an actor creates another actor using context.actorOf(...), it becomes its supervisor automatically.
+So, you do not need to create a separate supervisor actor — unless you want custom supervision logic for many actors in one place.
+       override val supervisorStrategy = OneForOneStrategy() {
+           case _: Exception => Restart
+              }
 12. What are the different strategies followed to handle the actor failure
+ONE-FOR-ONE 
+ALL-FOR-ONE
 13. Actor hierarchy 
 14. Actor's message box.
+
+Actor – the behavior logic
+Mailbox – holds pending messages
+Dispatcher – picks messages from mailbox and sends them to actor
+Thread pool / ExecutionContext – where message processing happens
+
+ 2. Each Actor Is Single-Threaded
+Even though multiple actors share the dispatcher,
+
+Each actor processes only one message at a time (thread-safe by design).
+
 15. Dispatchers & different kinds of dispatches.
+   What is the role of the dispatcher from picking up the message from the mail box .. explain its life cycle.
 16. Routers and routes 
 17. Different routing mechanisms and their use cases.
 18. What are the different reasons for the failure of the actors?
