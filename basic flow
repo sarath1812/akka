@@ -66,6 +66,19 @@ So, you do not need to create a separate supervisor actor — unless you want cu
 ONE-FOR-ONE 
 ALL-FOR-ONE
 13. Actor hierarchy 
+
+Every actor has a parent, except the root guardian.
+      / (root guardian)
+      ├── /user (user guardian)
+      │   ├── your-actors (created via system.actorOf)
+      │   │   └── their children...
+      │   └── ...
+      ├── /system (system guardian)
+      │   ├── scheduler
+      │   ├── loggers
+      │   └── ...
+      └── /deadLetters (special actor)
+
 14. Actor's message box.
 
 Actor – the behavior logic
@@ -99,7 +112,26 @@ All the messages send to the actor in case of termintaed, non existing , stopped
 How this got handeled are these messages get stored any where .. can it be reprocessed if they are important.
 Think of deadLetters as a mailbox where Akka puts "undeliverable" messages.
 
+You can subscribe to it for monitoring undelivered messages.
+
+//  system.eventStream.subscribe(self, classOf[DeadLetter])
+
+
 21. different hooks in the actors
+
+| Hook Method     | When It’s Called                                     |
+| --------------- | ---------------------------------------------------- |
+| `preStart()`    | Called **when the actor starts**                     |
+| `postStop()`    | Called **when the actor stops**                      |
+| `preRestart()`  | Called **before actor is restarted** after a failure |
+| `postRestart()` | Called **after actor is restarted**                  |
+
+override def preStart(): Unit = { /* init logic */ }
+override def postStop(): Unit = { /* cleanup logic */ }
+override def preRestart(reason: Throwable, message: Option[Any]): Unit = { /* before restart */ }
+override def postRestart(reason: Throwable): Unit = { /* after restart */ }
+
+
 22. Supervision mechanisms 
 
 every actor has the parent actor .. and that actor acts as the supervisior for the child actor 
@@ -145,6 +177,14 @@ supervisor ! "Hello again"
 23. Building the repeated jobs with the help of akka.
 24. Schedulers and different kinds of schedulers in akka.
 25. What libraries you follow to write the rest apis in akka. 
+      Akka Http , spray , play.
+
+    path("hello"){
+      get{
+         complete("hai this is a message.")
+         }
+       }
+
 26. Actor , ActorSystem , ActorReference.
 27. Killing an actor what is the need of killing an actor and different ways of killing an actor .
 28. Maintaing the state of an actor -> in general state of the actor gets lost when the actor gets restart
