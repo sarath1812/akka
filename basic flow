@@ -54,7 +54,7 @@ Actor Created → Started → (Restarted) → Stopped
 9. Sending a message to itself.
 10. Forwarding the messages. 
 11. How to handle the actor failure 
-   Actors failure can be handeled with the help of the supervison stratergy.4
+   Actors failure can be handeled with the help of the supervison stratergy
 
 The parent actor is always the supervisor of its children.
 Whenever an actor creates another actor using context.actorOf(...), it becomes its supervisor automatically.
